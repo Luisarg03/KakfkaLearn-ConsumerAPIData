@@ -1,0 +1,10 @@
+FROM apache/airflow:slim-2.8.1-python3.11
+USER airflow
+
+COPY ./dags /opt/airflow/dags
+COPY ./config /opt/airflow/config
+COPY ./logs /opt/airflow/logs
+COPY ./plugins /opt/airflow/plugins
+
+COPY ./requirements.txt /
+RUN pip install --no-cache-dir "apache-airflow==${AIRFLOW_VERSION}" -r /requirements.txt

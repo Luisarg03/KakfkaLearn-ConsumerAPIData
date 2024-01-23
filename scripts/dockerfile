@@ -1,0 +1,13 @@
+FROM python:3.9
+
+COPY ./data /app/data/
+COPY ./requirements.txt /app/
+COPY ./init.sql /app/
+COPY ./init_db.py /app/
+
+WORKDIR /app
+
+RUN python -m pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+CMD ["tail", "-f", "/dev/null"]

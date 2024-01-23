@@ -1,0 +1,23 @@
+{
+    "johndoe": {
+        "username": "johndoe",
+        "full_name": "John Doe",
+        "email": "johndoe@example.com",
+        "password": "secreto",
+        "disabled": "False"
+    },
+    "alice": {
+        "username": "alice",
+        "full_name": "Alice Chains",
+        "email": "alicechains@example.com",
+        "password": "secreto",
+        "disabled": "True"
+    },
+    "larg": {
+        "username": "luisarg03",
+        "full_name": "L",
+        "email": "larg@example.com",
+        "password": "secreto",
+        "disabled": "False"
+    }
+}

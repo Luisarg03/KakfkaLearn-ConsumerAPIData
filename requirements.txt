@@ -1,0 +1,10 @@
+fastapi==0.105.0
+fastapi-pagination==0.12.14
+python-multipart==0.0.6
+uvicorn[standard]==0.24.0
+SQLAlchemy==2.0.22
+sqlakeyset==2.0.1701229837
+sqlacodegen-v2==0.1.4
+psycopg2
+python-jose[cryptography]
+python-dotenv
