@@ -23,14 +23,14 @@ replacements = {
 }
 
 
-def connect_to_database(retries=4, delay=15):
+def connect_to_database(dbname, user, password, host, retries=4, delay=15):
     while retries:
         try:
             return psycopg2.connect(
-                dbname=os.environ['DATABASE_NAME'],
-                user=os.environ['DATABASE_USER'],
-                password=os.environ['DATABASE_PASSWORD'],
-                host=os.environ['DATABASE_HOST']
+                dbname=dbname,
+                user=user,
+                password=password,
+                host=host
             )
         except psycopg2.OperationalError as e:
             retries -= 1
@@ -41,7 +41,7 @@ def connect_to_database(retries=4, delay=15):
     raise Exception("No se pudo conectar a la base de datos")
 
 
-conn = connect_to_database(retries=5, delay=10)
+conn = connect_to_database(DBNAME, USER, PASSWORD, HOST, retries=5, delay=10)
 engine = create_engine(f'postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:5432/{DBNAME}')
 
 
