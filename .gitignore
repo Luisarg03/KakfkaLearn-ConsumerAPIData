@@ -8,6 +8,8 @@ airflow/logs/
 # Ignore .csv
 *.csv
 
+*ignore_me*
+
 # Python
 *.pyc
 __pycache__/

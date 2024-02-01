@@ -61,49 +61,49 @@ services:
     restart: always
 
 
-  # DB-CONSUMER:
-  #   build: ./postgres/
-  #   image: postgresql-airflow:1.0
-  #   expose:
-  #     - "5433"
-  #   ports:
-  #     - "5433:5433"
-  #   environment:
-  #     - POSTGRES_USER=${DATABASE_USER}
-  #     - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-  #     - POSTGRES_DB=${DATABASE_NAME}
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   networks:
-  #     - backend
+  DB-USER:
+    build: ./postgres/
+    image: postgresql-user:1.0
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
 
-  # INIT-DB:
-  #   build: ./scripts/
-  #   image: init-db:1.0
-  #   ports:
-  #     - "8081:8081"
-  #   environment:
-  #     - DATABASE_HOST=${DATABASE_HOST}
-  #     - DATABASE_USER=${DATABASE_USER}
-  #     - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-  #     - DATABASE_NAME=${DATABASE_NAME}
-  #     - SCHEMA_NAME=${SCHEMA_NAME}
-  #   depends_on:
-  #     - DB
-  #   networks:
-  #     - backend
+  INIT-DB:
+    build: ./scripts/
+    image: init-db:1.0
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - SCHEMA_NAME=${SCHEMA_NAME}
+    depends_on:
+      - DB-USER
+    networks:
+      - backend
 
-  # kafka:
-  #   image: 'bitnami/kafka:3.6.1'
-  #   environment:
-  #     - KAFKA_CFG_NODE_ID=0
-  #     - KAFKA_CFG_PROCESS_ROLES=controller,broker
-  #     - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-  #     - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-  #     - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-  #     - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-  #   ports:
-  #     - '9092:9092'
-  #   networks:
-  #     - backend
+  kafka:
+    image: 'bitnami/kafka:3.6.1'
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@<your_host>:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    ports:
+      - '9092:9092'
+      - '9094:9094'
+    networks:
+      - backend
 
