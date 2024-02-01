@@ -65,7 +65,7 @@ services:
     build: ./postgres/
     image: postgresql-user:1.0
     ports:
-      - "5433:5432"
+      - "${DATABASE_PORT}:5432"
     environment:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
@@ -76,12 +76,13 @@ services:
       - backend
 
   INIT-DB:
-    build: ./scripts/
+    build: ./postgres/scripts/
     image: init-db:1.0
     ports:
       - "8081:8081"
     environment:
       - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
       - DATABASE_USER=${DATABASE_USER}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_NAME=${DATABASE_NAME}

@@ -1,8 +1,0 @@
-id = ?
-site_id = MLA
-category_id = MLA1744
-currency_id = ?
-price = ?
-original_price = ?
-sale_price = ?
-seller = ?

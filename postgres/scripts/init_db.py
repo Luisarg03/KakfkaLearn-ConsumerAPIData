@@ -8,13 +8,15 @@ DBNAME = os.environ['DATABASE_NAME']
 USER = os.environ['DATABASE_USER']
 PASSWORD = os.environ['DATABASE_PASSWORD']
 HOST = os.environ['DATABASE_HOST']
+PORT = os.environ['DATABASE_PORT']
 SCHEMA_NAME = os.environ['SCHEMA_NAME']
 
-# DBNAME = "mydatabase"
-# USER = "myuser"
-# PASSWORD = "mypassword"
+# DBNAME = "AIRFLOW_DB"
+# USER = "USER_ADMIN"
+# PASSWORD = "USER_ADMIN_PASSWORD"
 # HOST = "localhost"
-# SCHEMA_NAME = "myschemadata2"
+# SCHEMA_NAME = "AIRFLOW_DATA"
+# PORT = "5433"
 
 sql_file_path = './init.sql'
 replacements = {
@@ -23,14 +25,15 @@ replacements = {
 }
 
 
-def connect_to_database(dbname, user, password, host, retries=4, delay=15):
+def connect_to_database(dbname, user, password, host, port, retries=4, delay=15):
     while retries:
         try:
             return psycopg2.connect(
                 dbname=dbname,
                 user=user,
                 password=password,
-                host=host
+                host=host,
+                port=port
             )
         except psycopg2.OperationalError as e:
             retries -= 1
@@ -41,8 +44,8 @@ def connect_to_database(dbname, user, password, host, retries=4, delay=15):
     raise Exception("No se pudo conectar a la base de datos")
 
 
-conn = connect_to_database(DBNAME, USER, PASSWORD, HOST, retries=5, delay=10)
-engine = create_engine(f'postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:5432/{DBNAME}')
+conn = connect_to_database(DBNAME, USER, PASSWORD, HOST, PORT, retries=5, delay=10)
+engine = create_engine(f'postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}')
 
 
 def execute_sql_script(engine, script_path, replacements):
