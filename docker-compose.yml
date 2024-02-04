@@ -10,66 +10,69 @@ networks:
 # #################################
 # # COMMON CONFS AIRFLOW SERVICES #
 # #################################
-x-airflow-common:
-  &airflow-common
-  image: apache/airflow:2.8.1-python3.11
-  environment:
-    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@airflow-postgresdb:5432/${AIRFLOW_POSTGRES_DB}
-    - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY}
-    - AIRFLOW__CORE__LOAD_EXAMPLES=False
-    - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
-  volumes:
-    - ./dags:/opt/airflow/dags
-    - ./airflow/dags:/opt/airflow/dags
-    - ./airflow/logs:/opt/airflow/logs
-    - ./airflow/plugins:/opt/airflow/plugins
-    - ./airflow/airflow.cfg:/opt/airlfow/airflow.cfg
-  depends_on:
-    - airflow-postgresdb
+# x-airflow-common:
+#   &airflow-common
+#   image: apache/airflow:2.8.1-python3.11
+#   environment:
+#     - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+#     - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_POSTGRES_USER}:${AIRFLOW_POSTGRES_PASSWORD}@airflow-postgresdb:5432/${AIRFLOW_POSTGRES_DB}
+#     - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY}
+#     - AIRFLOW__CORE__LOAD_EXAMPLES=False
+#     - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
+#   volumes:
+#     - ./dags:/opt/airflow/dags
+#     - ./airflow/dags:/opt/airflow/dags
+#     - ./airflow/logs:/opt/airflow/logs
+#     - ./airflow/plugins:/opt/airflow/plugins
+#     - ./airflow/airflow.cfg:/opt/airlfow/airflow.cfg
+#   depends_on:
+#     - airflow-postgresdb
 
 services:
   # ####################
   # # AIRFLOW SERVICES #
   # ####################
-  airflow-postgresdb:
-    image: postgres:12
-    environment:
-      - POSTGRES_USER=${AIRFLOW_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${AIRFLOW_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${AIRFLOW_POSTGRES_DB}
-      - POSTGRES_PORT=${AIRFLOW_POSTGRES_PORT}
-    ports:
-      - "${AIRFLOW_POSTGRES_PORT}:5432"
+  # airflow-postgresdb:
+  #   image: postgres:12
+  #   environment:
+  #     - POSTGRES_USER=${AIRFLOW_POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${AIRFLOW_POSTGRES_PASSWORD}
+  #     - POSTGRES_DB=${AIRFLOW_POSTGRES_DB}
+  #     - POSTGRES_PORT=${AIRFLOW_POSTGRES_PORT}
+  #   ports:
+  #     - "${AIRFLOW_POSTGRES_PORT}:5432"
 
-  airflow-init:
-    << : *airflow-common
-    container_name: airflow_init
-    command: >
-      bash -c "airflow db init 
-      && airflow users create -r Admin -u ${AIRFLOW_USER_ADMIN} -p ${AIRFLOW_PASSWORD_ADMIN} -e ${AIRFLOW_EMAIL_ADMIN} -f ${AIRFLOW_FNAME_ADMIN} -l ${AIRFLOW_LNAME_ADMIN}"
-    restart: on-failure
+  # airflow-init:
+  #   << : *airflow-common
+  #   container_name: airflow_init
+  #   command: >
+  #     bash -c "airflow db init 
+  #     && airflow users create -r Admin -u ${AIRFLOW_USER_ADMIN} -p ${AIRFLOW_PASSWORD_ADMIN} -e ${AIRFLOW_EMAIL_ADMIN} -f ${AIRFLOW_FNAME_ADMIN} -l ${AIRFLOW_LNAME_ADMIN}"
+  #   restart: on-failure
 
-  airflow-webserver:
-    << : *airflow-common
-    command: airflow webserver
-    ports:
-      - ${AIRFLOW_INIT_PORT}:8080
-    container_name: airflow_webserver
-    restart: always
-    depends_on:
-      - airflow-init
+  # airflow-webserver:
+  #   << : *airflow-common
+  #   command: airflow webserver
+  #   ports:
+  #     - ${AIRFLOW_INIT_PORT}:8080
+  #   container_name: airflow_webserver
+  #   restart: always
+  #   depends_on:
+  #     - airflow-init
 
-  airflow-scheduler:
-    << : *airflow-common
-    command: airflow scheduler
-    container_name: airflow_scheduler
-    restart: always
+  # airflow-scheduler:
+  #   << : *airflow-common
+  #   command: airflow scheduler
+  #   container_name: airflow_scheduler
+  #   restart: always
 
   # ##################
   # # KAFKA SERVICES #
   # ##################
-  kafka:
+  # ############
+  # # BROKER 1 #
+  # ############
+  kafka-0:
     image: 'bitnami/kafka:3.6.1'
     environment:
       - KAFKA_CFG_NODE_ID=0
@@ -79,42 +82,49 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      # - KAFKA_INTER_BROKER_USER=${KAFKA_INTER_BROKER_USER}
+      # - KAFKA_INTER_BROKER_PASSWORD=${KAFKA_INTER_BROKER_PASSWORD}
+      # - KAFKA_ZOOKEEPER_PROTOCOL=SASL_SSL
+      # - KAFKA_CFG_SASL_ENABLED_MECHANISMS=SCRAM-SHA-256
     ports:
       - '9092:9092'
+      - '9093:9093'
       - '9094:9094'
+    # volumes:
+    #   - './kafka/data:/bitnami/kafka'
     networks:
       - backend
 
   # #################
   # # USER SERVICES #
   # #################
-  DB-USER:
-    build: ./postgres/
-    image: postgresql-user:1.0
-    ports:
-      - "${DATABASE_PORT}:5432"
-    environment:
-      - POSTGRES_USER=${DATABASE_USER}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - backend
+  # DB-USER:
+  #   build: ./postgres/
+  #   image: postgresql-user:1.0
+  #   ports:
+  #     - "${DATABASE_PORT}:5432"
+  #   environment:
+  #     - POSTGRES_USER=${DATABASE_USER}
+  #     - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+  #     - POSTGRES_DB=${DATABASE_NAME}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - backend
 
-  INIT-DB:
-    build: ./init_db/
-    image: init-db:1.0
-    ports:
-      - "8081:8081"
-    environment:
-      - DATABASE_HOST=DB-USER
-      - DATABASE_PORT=5432
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_NAME=${DATABASE_NAME}
-      - SCHEMA_NAME=${SCHEMA_NAME}
-    depends_on:
-      - DB-USER
-    networks:
-      - backend
+  # INIT-DB:
+  #   build: ./init_db/
+  #   image: init-db:1.0
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     - DATABASE_HOST=DB-USER
+  #     - DATABASE_PORT=5432
+  #     - DATABASE_USER=${DATABASE_USER}
+  #     - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+  #     - DATABASE_NAME=${DATABASE_NAME}
+  #     - SCHEMA_NAME=${SCHEMA_NAME}
+  #   depends_on:
+  #     - DB-USER
+  #   networks:
+  #     - backend
