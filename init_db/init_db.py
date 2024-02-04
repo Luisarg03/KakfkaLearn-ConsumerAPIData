@@ -11,13 +11,6 @@ HOST = os.environ['DATABASE_HOST']
 PORT = os.environ['DATABASE_PORT']
 SCHEMA_NAME = os.environ['SCHEMA_NAME']
 
-# DBNAME = "AIRFLOW_DB"
-# USER = "USER_ADMIN"
-# PASSWORD = "USER_ADMIN_PASSWORD"
-# HOST = "localhost"
-# SCHEMA_NAME = "AIRFLOW_DATA"
-# PORT = "5433"
-
 sql_file_path = './init.sql'
 replacements = {
     '{{{DB_NAME}}}': DBNAME,

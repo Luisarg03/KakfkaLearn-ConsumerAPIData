@@ -7,6 +7,9 @@ networks:
   backend:
      driver: bridge
 
+# #################################
+# # COMMON CONFS AIRFLOW SERVICES #
+# #################################
 x-airflow-common:
   &airflow-common
   image: apache/airflow:2.8.1-python3.11
@@ -26,6 +29,9 @@ x-airflow-common:
     - airflow-postgresdb
 
 services:
+  # ####################
+  # # AIRFLOW SERVICES #
+  # ####################
   airflow-postgresdb:
     image: postgres:12
     environment:
@@ -60,38 +66,9 @@ services:
     container_name: airflow_scheduler
     restart: always
 
-
-  DB-USER:
-    build: ./postgres/
-    image: postgresql-user:1.0
-    ports:
-      - "${DATABASE_PORT}:5432"
-    environment:
-      - POSTGRES_USER=${DATABASE_USER}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - backend
-
-  INIT-DB:
-    build: ./postgres/scripts/
-    image: init-db:1.0
-    ports:
-      - "8081:8081"
-    environment:
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_PORT=${DATABASE_PORT}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_NAME=${DATABASE_NAME}
-      - SCHEMA_NAME=${SCHEMA_NAME}
-    depends_on:
-      - DB-USER
-    networks:
-      - backend
-
+  # ##################
+  # # KAFKA SERVICES #
+  # ##################
   kafka:
     image: 'bitnami/kafka:3.6.1'
     environment:
@@ -108,3 +85,36 @@ services:
     networks:
       - backend
 
+  # #################
+  # # USER SERVICES #
+  # #################
+  DB-USER:
+    build: ./postgres/
+    image: postgresql-user:1.0
+    ports:
+      - "${DATABASE_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  INIT-DB:
+    build: ./init_db/
+    image: init-db:1.0
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_HOST=DB-USER
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - SCHEMA_NAME=${SCHEMA_NAME}
+    depends_on:
+      - DB-USER
+    networks:
+      - backend

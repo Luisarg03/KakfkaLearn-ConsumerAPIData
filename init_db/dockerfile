@@ -1,6 +1,5 @@
 FROM python:3.9
 
-COPY ./data /app/data/
 COPY ./requirements.txt /app/
 COPY ./init.sql /app/
 COPY ./init_db.py /app/
