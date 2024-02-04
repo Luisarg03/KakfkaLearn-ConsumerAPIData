@@ -10,11 +10,13 @@ config = {
 
 producer = Producer(**config)
 
+
 def delivery_report(err, msg):
     if err is not None:
         print(f'Mensaje no entregado: {err}')
     else:
         print(f'Mensaje entregado a {msg.topic()} [{msg.partition()}]')
+
 
 url = "https://api.mercadolibre.com/sites/MLA/search?q=peugeot 208 gti&offset=0"
 
@@ -41,7 +43,7 @@ attributes = [
 data_filter = []
 for d in data['results']:
     d['timestamp'] = datetime.now().isoformat()
-    selected_attributes  = {attribute: d.get(attribute, None) for attribute in attributes}
+    selected_attributes = {attribute: d.get(attribute, None) for attribute in attributes}
     message = json.dumps(selected_attributes).encode('utf-8')
     producer.produce('autos_usados', message, callback=delivery_report)
     producer.poll(0)
