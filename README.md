@@ -4,7 +4,7 @@ Descripción breve del proyecto.
 
 ## Arquitectura
 
-![Arquitectura](docs/img/POC_DIAG_PROYECT.png)
+![Arquitectura](docs/img/DIAG_PROYECT.png)
 
 Este proyecto utiliza una arquitectura basada en microservicios con un flujo de trabajo de procesamiento de datos en tiempo real. A continuación se describe cada componente:
 

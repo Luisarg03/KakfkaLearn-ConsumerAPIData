@@ -3,15 +3,19 @@ from confluent_kafka import Consumer, KafkaError
 from sqlalchemy import create_engine, text, exc
 
 
+# #########
+# # CONFS #
+# #########
+TOPIC = 'used_cars'
+
 config = {
     'bootstrap.servers': 'localhost:9094',
     'group.id': 'consumer_autos_usados',
-    'auto.offset.reset': 'latest'
+    'auto.offset.reset': 'earliest'
 }
 
 consumer = Consumer(**config)
-consumer.subscribe(['autos_usados'])
-
+consumer.subscribe([TOPIC])
 
 DBNAME = "AIRFLOW_DB"
 USER = "USER_ADMIN"
@@ -44,6 +48,7 @@ def execute_sql_script(engine, script_path, replacements):
                         print(f"COMMAND: {command} >>> FAILED EXEC\n")
                         print(e)
 
+
 try:
     while True:
         msg = consumer.poll(timeout=1.0)
@@ -57,15 +62,17 @@ try:
                 print(msg.error())
                 break
 
-        register_id = json.loads(msg.value().decode('utf-8'))['id']
+        register_id = json.loads(msg.value().decode('utf-8'))['kfk_id']
         msg = msg.value().decode('utf-8')
+        print(msg)
 
         replacements = {
             '{{{REGISTER_ID}}}': register_id,
-            '{{{DATA}}}': msg
+            '{{{DATA}}}': msg,
+            '{{{SCHEMA_NAME}}}': SCHEMA_NAME,
+            '{{{TABLE_NAME}}}': TOPIC
         }
 
         execute_sql_script(engine, sql_file_path, replacements)
-
 finally:
     consumer.close()
