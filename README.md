@@ -1,45 +1,42 @@
 # Nombre del Proyecto
 
-Descripción breve del proyecto.
+Breve descripción del proyecto, su propósito y alcance.
 
 ## Arquitectura
 
-![Arquitectura](docs/img/DIAG_PROYECT.png)
+![title](./docs/img/DIAG_PROYECT.jpg)
 
-Este proyecto utiliza una arquitectura basada en microservicios con un flujo de trabajo de procesamiento de datos en tiempo real. A continuación se describe cada componente:
 
-### Productor-Py
+### Componentes
 
-- **Descripción**: Microservicio encargado de producir datos desde una API y enviarlos a Kafka.
-- **Tecnologías**: Python.
+- **API**: Punto de entrada para los datos, expone una interfaz REST para la ingesta de datos.
+- **Producer**: Módulo Python (`Producer-Py`) que recopila datos de la API.
+- **Consumer**: Módulo Python (`Consumer-Py`) que consume los datos proporcionados por el `Producer`.
+- **Redis**: Sistema de almacenamiento en memoria que actúa como base de datos temporal (`TempDB`) para los datos consumidos.
+- **Airflow**: Orquestador de flujos de trabajo que gestiona y automatiza los procesos de tratamiento de datos.
+  - **LANDING**: Primera capa de procesamiento donde los datos aterrizan desde `Redis`.
+  - **RAW**: Capa de datos crudos donde se almacenan los datos sin procesar.
+  - **STG**: Capa de 'staging' o ensayo, que sirve como área intermedia para el procesamiento de datos.
+  - **CUR**: Capa actual, donde los datos están listos para ser utilizados por aplicaciones finales.
+- **DB-Postgres**: Base de datos PostgreSQL que almacena datos en las diferentes capas (`LANDING`, `RAW`, `STG`, `CUR`).
 
-### Kafka
+## Instalación
 
-- **Descripción**: Sistema de mensajería distribuido que maneja el flujo de datos entre productores y consumidores.
-- **Tecnologías**: Apache Kafka.
 
-### Airflow-Consumidor-Py
 
-- **Descripción**: Microservicio que consume los datos de Kafka y los procesa según la lógica de negocio.
-- **Tecnologías**: Python, Apache Airflow para la orquestación de tareas.
+### Requisitos
 
-### DB-Postgres
 
-- **Descripción**: Base de datos donde se almacenan los datos procesados.
-- **Tecnologías**: PostgreSQL.
+### Configuración
 
-### Docker
 
-- **Descripción**: Utilizado para contenerizar y gestionar los servicios de manera aislada.
+## Uso
 
-## Inicio Rápido
 
-Instrucciones para comenzar a utilizar el proyecto:
+## Contribuir
 
-```bash
-# Clonar el repositorio
-git clone [URL_DEL_REPOSITORIO]
+Guía para desarrolladores interesados en contribuir al proyecto.
 
-# Exec script de inicialización
-./sh init.sh
-```
+## Licencia
+
+Detalles sobre la licencia del proyecto.
