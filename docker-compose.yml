@@ -1,7 +1,7 @@
 version: '3.8'
 
-volumes:
-  postgres_data: { }
+# volumes:
+#   postgres_data: { }
 
 networks:
   backend:
@@ -42,7 +42,7 @@ services:
     ports:
       - "${AIRFLOW_POSTGRES_PORT}:5432"
     volumes:
-      - ./airflow/postgresql/data:/var/lib/postgresql/data
+      - ./airflow/postgresql/db_data:/var/lib/postgresql/data
 
   airflow-init:
     << : *airflow-common
@@ -101,7 +101,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ./redis/dаta:/root/redis
+      - ./redis/db_data:/root/redis
       # - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
       - REDIS_PORT=6379
@@ -120,7 +120,7 @@ services:
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
       - POSTGRES_DB=${DATABASE_NAME}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/db_data:/var/lib/postgresql/data
     networks:
       - backend
 
