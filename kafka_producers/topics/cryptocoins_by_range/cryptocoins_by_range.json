@@ -1,10 +1,10 @@
 {
-    "topic": "cryptocoins",
-    "url": "https://api.coingecko.com/api/v3/coins/list",
-    "parse_by": null,
-    "attributes": [
-        "id",
-        "symbol",
-        "name"
-    ]
+    "topic": "cryptocoins_by_range",
+    "url": "https://api.coingecko.com/api/v3/coins/adapad/market_chart/range?vs_currency=usd&from=1706232797&to=1708911197",
+    "from": 1706232797,
+    "to": 1708911197,
+    "attr": {
+        "COIN": "bitcoin",
+        "CURRENCY": "usd"
+    }
 }
