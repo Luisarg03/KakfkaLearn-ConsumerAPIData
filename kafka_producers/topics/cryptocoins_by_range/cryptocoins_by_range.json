@@ -1,10 +1,12 @@
 {
     "topic": "cryptocoins_by_range",
-    "url": "https://api.coingecko.com/api/v3/coins/adapad/market_chart/range?vs_currency=usd&from=1706232797&to=1708911197",
-    "from": 1706232797,
-    "to": 1708911197,
+    "url": "https://api.coingecko.com/api/v3/coins/adapad/market_chart/range?vs_currency=usd&from={{{FROM}}}&to={{{TO}}}",
+    "json_update": true,
+    "FROM": 1708916621,
+    "TO": 0,
     "attr": {
-        "COIN": "bitcoin",
+        "COIN": "adapad",
         "CURRENCY": "usd"
-    }
+    },
+    "from": 1708908602
 }

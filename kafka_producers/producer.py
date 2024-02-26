@@ -46,7 +46,7 @@ def delivery_report(err, msg):
     return None
 
 
-def MiFuncion(conf, func_mapping):
+def func_map(conf, func_mapping):
     topic_function = func_mapping.get(conf['topic'])
     if topic_function:
         return topic_function(conf)
@@ -62,12 +62,12 @@ topic_configs = read_all_json_files(folder_path)
 
 for conf in topic_configs:
     if conf['topic'] in TOPICS:
-        data = MiFuncion(conf, TOPICS)
-  
-        # for d in data:
-        #     topic = conf['topic']
-        #     d = json.dumps(d).encode('utf-8')
-        #     producer.produce(topic, d, callback=delivery_report)
-        #     producer.poll(0)
+        data = func_map(conf, TOPICS)
 
-        # producer.flush()
+        for d in data:
+            topic = conf['topic']
+            d = json.dumps(d).encode('utf-8')
+            producer.produce(topic, d, callback=delivery_report)
+            producer.poll(0)
+
+        producer.flush()
