@@ -1,0 +1,16 @@
+{
+    "topic": "usedcars",
+    "url": "https://api.mercadolibre.com/sites/MLA/search?q=peugeot 208 gti&offset=0",
+    "parse_by": "results",
+    "attributes": [
+        "id",
+        "site_id",
+        "category_id",
+        "currency_id",
+        "price",
+        "original_price",
+        "sale_price",
+        "seller",
+        "location"
+    ]
+}

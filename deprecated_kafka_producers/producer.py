@@ -60,13 +60,16 @@ def func_map(conf, func_mapping):
 folder_path = './topics/'
 topic_configs = read_all_json_files(folder_path)
 
+print(topic_configs)
+
 for conf in topic_configs:
     if conf['topic'] in TOPICS:
         data = func_map(conf, TOPICS)
-
+        print(data)
         for d in data:
             topic = conf['topic']
             d = json.dumps(d).encode('utf-8')
+            print(d)
             producer.produce(topic, d, callback=delivery_report)
             producer.poll(0)
 
