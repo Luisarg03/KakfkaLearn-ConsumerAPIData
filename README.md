@@ -8,7 +8,7 @@ Proyecto personal para aprender a trabajar con Apache Kafka e implementarlo en u
 
 ## Arquitectura
 
-![title](./docs/img/DIAG_PROYECT.jpg)
+![title](./docs/img/DIAG_PROYECT_v2.jpg)
 
 
 ### Componentes
