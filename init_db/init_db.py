@@ -11,11 +11,12 @@ HOST = os.environ['DATABASE_HOST']
 PORT = os.environ['DATABASE_PORT']
 SCHEMA_NAME = os.environ['SCHEMA_NAME']
 
-sql_file_path = './init.sql'
-replacements = {
-    '{{{DB_NAME}}}': DBNAME,
-    '{{{SCHEMA_NAME}}}': SCHEMA_NAME
-}
+# PORT = '5433'
+# USER = 'USER_ADMIN'
+# PASSWORD = 'USER_ADMIN_PASSWORD'
+# DBNAME = 'AIRFLOW_DB'
+# SCHEMA_NAME = 'AIRFLOW_DATA'
+# HOST = 'localhost'
 
 
 def connect_to_database(dbname, user, password, host, port, retries=4, delay=15):
@@ -49,19 +50,27 @@ def execute_sql_script(engine, script_path, replacements):
         for old_value, new_value in replacements.items():
             sql_script = sql_script.replace(old_value, new_value)
 
-        commands = sql_script.split(';')
-
-        for command in commands:
-            if command.strip() != '':
-                command = command + ';'
-                command = command.strip().replace('\n', ' ')
-                with engine.connect() as connection:
-                    connection.execution_options(isolation_level="AUTOCOMMIT")
-                    try:
-                        connection.execute(text(command))
-                    except (Exception, exc.ProgrammingError) as e:
-                        print(f"COMMAND: {command} >>> FAILED EXEC\n")
-                        print(e)
+        # Ejecuta el script completo en una sola transacción
+        with engine.begin() as connection:
+            try:
+                connection.execute(text(sql_script))
+            except (Exception, exc.SQLAlchemyError) as e:
+                print(f"Error al ejecutar el script SQL: {e}")
+                raise e
 
 
-execute_sql_script(engine, sql_file_path, replacements)
+files_paths = [
+    {
+        'path': './init.sql',
+        'replacements': {
+            '{{{DB_NAME}}}': DBNAME,
+            '{{{SCHEMA_NAME}}}': SCHEMA_NAME
+        }
+    }
+]
+
+for file in files_paths:
+    sql_file_path = file['path']
+    replacements = file['replacements']
+    execute_sql_script(engine, sql_file_path, replacements)
+    print(f"Script {sql_file_path} ejecutado correctamente")

@@ -1,18 +1,14 @@
+import os
 import requests
 import json
-import uuid
 from confluent_kafka import Producer
-from datetime import datetime
+
+from topics.cryptocoins_by_range.cryptocoins_by_range import cryptocoins_by_range
 
 
-# #########
-# # CONFS #
-# #########
-TOPIC = 'used_cars'
-
-with open(f'{TOPIC}.json') as f:
-    topic_config = json.load(f)
-f.close()
+#########
+# CONFS #
+#########
 
 server_config = {
     'bootstrap.servers': 'localhost:9094'
@@ -20,10 +16,27 @@ server_config = {
 
 producer = Producer(**server_config)
 
+TOPICS = {
+    'cryptocoins_by_range': cryptocoins_by_range
+}
+
 
 # ###############
 # # HELP FUNCTS #
 # ###############
+def read_all_json_files(folder_path):
+    json_files = []
+    for f1 in os.listdir(folder_path):
+        if not f1.endswith('.py'):
+            for f2 in os.listdir(f'{folder_path}/{f1}'):
+                if f2.endswith('.json'):
+                    file_path = os.path.join(folder_path, f1, f2)
+                    with open(file_path) as f:
+                        json_data = json.load(f)
+                        json_files.append(json_data)
+    return json_files
+
+
 def delivery_report(err, msg):
     if err is not None:
         print(f'Undelivered message: {err}')
@@ -33,38 +46,28 @@ def delivery_report(err, msg):
     return None
 
 
-# ###########
-# # REQUEST #
-# ###########
-url = topic_config['url']
-response = requests.get(url)
+def func_map(conf, func_mapping):
+    topic_function = func_mapping.get(conf['topic'])
+    if topic_function:
+        return topic_function(conf)
+    else:
+        print(f"Function not found for topic {conf['topic']}")
 
-if response.status_code == 200:
-    data = response.json()
-else:
-    print("Error al realizar la solicitud:", response.status_code)
 
-# ################
-# # SEND MESSAGE #
-# ################
-attributes = topic_config['attributes']
+# ##############
+# # ITER FILES #
+# ##############
+folder_path = './topics/'
+topic_configs = read_all_json_files(folder_path)
 
-data_filter = []
-uuid = str(uuid.uuid1()).replace('-', '')[:12]
+for conf in topic_configs:
+    if conf['topic'] in TOPICS:
+        data = func_map(conf, TOPICS)
 
-for d in data['results']:
-    d = {attribute: d.get(attribute, None) for attribute in attributes}
+        for d in data:
+            topic = conf['topic']
+            d = json.dumps(d).encode('utf-8')
+            producer.produce(topic, d, callback=delivery_report)
+            producer.poll(0)
 
-    try:
-        d['kfk_id'] = d['id'] + uuid
-    except (Exception, KeyError) as e:
-        e = e
-        d['kfk_id'] = uuid
-
-    d['kfk_timestamp'] = datetime.now().isoformat()
-
-    d = json.dumps(d).encode('utf-8')
-    producer.produce(TOPIC, d, callback=delivery_report)
-    producer.poll(0)
-
-producer.flush()
+        producer.flush()
